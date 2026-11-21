@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Production output
+dist/
+
+# Test coverage
+coverage/
+
+# Archives & logs
+*.tgz
+*.log
+npm-debug.log*
+
+# Environment and OS
+.env
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

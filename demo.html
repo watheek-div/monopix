@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>monopix - Interactive Playground</title>
+  <style>
+    :root {
+      --bg: #090D16;
+      --panel: #131B2E;
+      --border: #1E293B;
+      --text: #F1F5F9;
+      --text-muted: #94A3B8;
+      --accent: #38BDF8;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Cairo", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 {
+      font-size: 20px;
+      letter-spacing: -0.5px;
+    }
+    header span {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      flex: 1;
+      height: calc(100vh - 65px);
+    }
+    .controls {
+      background: var(--panel);
+      border-left: 1px solid var(--border);
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+    label span.val {
+      color: var(--accent);
+      font-family: monospace;
+    }
+    input[type="text"], select, input[type="number"] {
+      background: #0B1120;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type="text"]:focus, select:focus, input[type="number"]:focus {
+      border-color: var(--accent);
+    }
+    .color-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .color-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #0B1120;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 10px;
+    }
+    input[type="color"] {
+      -webkit-appearance: none;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      background: transparent;
+    }
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+    input[type="color"]::-webkit-color-swatch {
+      border: none;
+      border-radius: 6px;
+    }
+    .color-field span {
+      font-size: 12px;
+      font-family: monospace;
+      color: var(--text-muted);
+    }
+    input[type="range"] {
+      accent-color: var(--accent);
+    }
+    .preview-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      gap: 28px;
+      background: radial-gradient(circle at center, #131E35 0%, var(--bg) 70%);
+      position: relative;
+    }
+    .avatar-wrapper {
+      filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.6));
+      transition: transform 0.2s ease;
+    }
+    .avatar-wrapper:hover {
+      transform: scale(1.02);
+    }
+    .meta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #0B1120;
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .meta-badge strong {
+      color: var(--text);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+    button.btn {
+      background: #1E293B;
+      color: var(--text);
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    button.btn:hover {
+      background: #334155;
+      border-color: var(--accent);
+    }
+    button.btn-primary {
+      background: var(--accent);
+      color: #04101F;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    button.btn-primary:hover {
+      background: #7DD3FC;
+      border-color: #7DD3FC;
+    }
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .preset-pill {
+      background: #0B1120;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .preset-pill:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .controls {
+        border-left: none;
+        border-bottom: 1px solid var(--border);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>monopix Playground</h1>
+    <span>توليد الصور الرمزية بالبكسل - معاينة تفاعلية حية</span>
+  </header>
+
+  <div class="layout">
+    <div class="controls">
+      <div class="form-group">
+        <label>نماذج جاهزة (Presets)</label>
+        <div class="presets">
+          <div class="preset-pill" data-preset="ahmed">أحمد (7x7)</div>
+          <div class="preset-pill" data-preset="sara">سارة (Circle Dots)</div>
+          <div class="preset-pill" data-preset="mohammed">محمد (Rounded)</div>
+          <div class="preset-pill" data-preset="retro">Retro Viper (5x5)</div>
+          <div class="preset-pill" data-preset="highres">High-res K (14x14)</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="name">الاسم / النص</label>
+        <input type="text" id="name" value="أحمد">
+      </div>
+
+      <div class="form-group">
+        <label for="gridSize">
+          <span>أبعاد الشبكة (Grid Size)</span>
+          <span class="val" id="gridSize-val">7x7</span>
+        </label>
+        <input type="range" id="gridSize" min="3" max="21" step="1" value="7">
+      </div>
+
+      <div class="form-group">
+        <label for="size">
+          <span>حجم الإخراج الكلي (px)</span>
+          <span class="val" id="size-val">220px</span>
+        </label>
+        <input type="range" id="size" min="64" max="400" step="16" value="220">
+      </div>
+
+      <div class="color-row">
+        <div class="form-group">
+          <label for="color">لون الحرف</label>
+          <div class="color-field">
+            <input type="color" id="color" value="#10B981">
+            <span id="color-hex">#10B981</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="background">لون الخلفية</label>
+          <div class="color-field">
+            <input type="color" id="background" value="#0F172A">
+            <span id="background-hex">#0F172A</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="shape">شكل الإطار الخارجي</label>
+        <select id="shape">
+          <option value="square" selected>مربع (Square)</option>
+          <option value="circle">دائري (Circle)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="pixelShape">شكل البكسل الفردي</label>
+        <select id="pixelShape">
+          <option value="square" selected>مربع (Square)</option>
+          <option value="circle">دائري (Circle Dots)</option>
+          <option value="rounded">حواف دائرية (Rounded)</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="pixelRadius-group" style="display: none;">
+        <label for="pixelRadius">
+          <span>استدارة البكسل (Corner Radius)</span>
+          <span class="val" id="pixelRadius-val">0.3</span>
+        </label>
+        <input type="range" id="pixelRadius" min="0" max="0.5" step="0.05" value="0.3">
+      </div>
+
+      <div class="form-group">
+        <label for="padding">
+          <span>الهامش الداخلي (Padding)</span>
+          <span class="val" id="padding-val">1 cell</span>
+        </label>
+        <input type="range" id="padding" min="0" max="3" step="0.5" value="1">
+      </div>
+
+      <div class="form-group">
+        <label for="gap">
+          <span>الفراغ بين البكسلات (Gap)</span>
+          <span class="val" id="gap-val">0</span>
+        </label>
+        <input type="range" id="gap" min="0" max="0.4" step="0.05" value="0">
+      </div>
+    </div>
+
+    <div class="preview-panel">
+      <div class="avatar-wrapper" id="avatar-container"></div>
+
+      <div class="meta-badge" id="meta-badge">
+        <span>الحرف المستخرج:</span>
+        <strong id="meta-char">أ</strong>
+        <span>•</span>
+        <span id="meta-dims">7x7 cells</span>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="btn-download">تحميل SVG</button>
+        <button class="btn" id="btn-copy-svg">نسخ كود SVG</button>
+        <button class="btn" id="btn-copy-uri">نسخ Data URI</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createAvatar } from './dist/index.js';
+
+    const els = {
+      name: document.getElementById('name'),
+      gridSize: document.getElementById('gridSize'),
+      gridSizeVal: document.getElementById('gridSize-val'),
+      size: document.getElementById('size'),
+      sizeVal: document.getElementById('size-val'),
+      color: document.getElementById('color'),
+      colorHex: document.getElementById('color-hex'),
+      background: document.getElementById('background'),
+      backgroundHex: document.getElementById('background-hex'),
+      shape: document.getElementById('shape'),
+      pixelShape: document.getElementById('pixelShape'),
+      pixelRadius: document.getElementById('pixelRadius'),
+      pixelRadiusVal: document.getElementById('pixelRadius-val'),
+      pixelRadiusGroup: document.getElementById('pixelRadius-group'),
+      padding: document.getElementById('padding'),
+      paddingVal: document.getElementById('padding-val'),
+      gap: document.getElementById('gap'),
+      gapVal: document.getElementById('gap-val'),
+      container: document.getElementById('avatar-container'),
+      metaChar: document.getElementById('meta-char'),
+      metaDims: document.getElementById('meta-dims'),
+      btnDownload: document.getElementById('btn-download'),
+      btnCopySvg: document.getElementById('btn-copy-svg'),
+      btnCopyUri: document.getElementById('btn-copy-uri'),
+    };
+
+    let currentAvatar = null;
+
+    function render() {
+      const name = els.name.value;
+      const gridSize = parseInt(els.gridSize.value, 10);
+      const size = parseInt(els.size.value, 10);
+      const color = els.color.value;
+      const background = els.background.value;
+      const shape = els.shape.value;
+      const pixelShape = els.pixelShape.value;
+      const pixelRadius = parseFloat(els.pixelRadius.value);
+      const padding = parseFloat(els.padding.value);
+      const gap = parseFloat(els.gap.value);
+
+      // Value label updates
+      els.gridSizeVal.textContent = `${gridSize}x${gridSize}`;
+      els.sizeVal.textContent = `${size}px`;
+      els.colorHex.textContent = color.toUpperCase();
+      els.backgroundHex.textContent = background.toUpperCase();
+      els.paddingVal.textContent = `${padding} cell`;
+      els.gapVal.textContent = `${gap}`;
+      els.pixelRadiusVal.textContent = `${pixelRadius}`;
+
+      els.pixelRadiusGroup.style.display = pixelShape === 'rounded' ? 'flex' : 'none';
+
+      currentAvatar = createAvatar({
+        name,
+        size,
+        options: {
+          gridSize,
+          color,
+          background,
+          shape,
+          pixelShape,
+          pixelRadius,
+          padding,
+          gap
+        }
+      });
+
+      els.container.innerHTML = currentAvatar.toSVG();
+      els.metaChar.textContent = currentAvatar.char;
+      els.metaDims.textContent = `${gridSize}x${gridSize} cells`;
+    }
+
+    // Attach listeners
+    const inputs = [
+      els.name, els.gridSize, els.size, els.color,
+      els.background, els.shape, els.pixelShape,
+      els.pixelRadius, els.padding, els.gap
+    ];
+
+    inputs.forEach(input => {
+      input.addEventListener('input', render);
+      input.addEventListener('change', render);
+    });
+
+    // Preset configurations
+    const presets = {
+      ahmed: { name: 'أحمد', gridSize: 7, color: '#10B981', background: '#0F172A', shape: 'square', pixelShape: 'square', padding: 1, gap: 0 },
+      sara: { name: 'سارة', gridSize: 7, color: '#F43F5E', background: '#1E1B4B', shape: 'circle', pixelShape: 'circle', padding: 1, gap: 0.1 },
+      mohammed: { name: 'محمد', gridSize: 7, color: '#F59E0B', background: '#18181B', shape: 'square', pixelShape: 'rounded', pixelRadius: 0.35, padding: 1, gap: 0 },
+      retro: { name: 'Viper', gridSize: 5, color: '#38BDF8', background: '#090D16', shape: 'square', pixelShape: 'square', padding: 1, gap: 0 },
+      highres: { name: 'Kratos', gridSize: 14, color: '#818CF8', background: '#1E1B4B', shape: 'circle', pixelShape: 'rounded', pixelRadius: 0.25, padding: 1, gap: 0 }
+    };
+
+    document.querySelectorAll('.preset-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const p = presets[pill.dataset.preset];
+        if (!p) return;
+        els.name.value = p.name;
+        els.gridSize.value = p.gridSize;
+        els.color.value = p.color;
+        els.background.value = p.background;
+        els.shape.value = p.shape;
+        els.pixelShape.value = p.pixelShape;
+        if (p.pixelRadius !== undefined) els.pixelRadius.value = p.pixelRadius;
+        if (p.padding !== undefined) els.padding.value = p.padding;
+        if (p.gap !== undefined) els.gap.value = p.gap;
+        render();
+      });
+    });
+
+    // Action handlers
+    els.btnDownload.addEventListener('click', () => {
+      if (!currentAvatar) return;
+      const blob = new Blob([currentAvatar.toSVG()], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `avatar-${currentAvatar.char}.svg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    els.btnCopySvg.addEventListener('click', () => {
+      if (!currentAvatar) return;
+      navigator.clipboard.writeText(currentAvatar.toSVG()).then(() => {
+        const orig = els.btnCopySvg.textContent;
+        els.btnCopySvg.textContent = 'تم النسخ!';
+        setTimeout(() => els.btnCopySvg.textContent = orig, 1500);
+      });
+    });
+
+    els.btnCopyUri.addEventListener('click', () => {
+      if (!currentAvatar) return;
+      navigator.clipboard.writeText(currentAvatar.toDataURI()).then(() => {
+        const orig = els.btnCopyUri.textContent;
+        els.btnCopyUri.textContent = 'تم النسخ!';
+        setTimeout(() => els.btnCopyUri.textContent = orig, 1500);
+      });
+    });
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
