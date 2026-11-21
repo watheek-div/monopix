@@ -36,7 +36,15 @@
     "initials",
     "svg"
   ],
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/watheek-div/monopix.git"
+  },
+  "bugs": {
+    "url": "https://github.com/watheek-div/monopix/issues"
+  },
+  "homepage": "https://github.com/watheek-div/monopix#readme",
+  "author": "watheek-div",
   "license": "MIT",
   "devDependencies": {
     "tsup": "^8.3.6",
