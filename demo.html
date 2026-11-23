@@ -243,27 +243,6 @@
       outline: none;
     }
 
-    /* Presets */
-    .presets {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .preset-pill {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      font-size: 12px;
-      padding: 5px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .preset-pill:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: var(--accent-dim);
-    }
 
     /* Preview Panel */
     .preview-panel {
@@ -538,18 +517,6 @@
     <div class="playground-layout">
       <!-- Controls Column -->
       <aside class="controls">
-        <div class="form-group">
-          <label data-i18n="presetsLabel">النماذج الجاهزة (Presets)</label>
-          <div class="presets">
-            <div class="preset-pill" data-preset="neon">Neon Lime</div>
-            <div class="preset-pill" data-preset="ahmed">أحمد (Cyber)</div>
-            <div class="preset-pill" data-preset="sara">سارة (Dots)</div>
-            <div class="preset-pill" data-preset="retro">Retro (5x5)</div>
-            <div class="preset-pill" data-preset="mohammed">محمد (Rounded)</div>
-            <div class="preset-pill" data-preset="highres">Matrix (14x14)</div>
-          </div>
-        </div>
-
         <div class="form-group">
           <label for="name" data-i18n="nameLabel">الاسم / النص</label>
           <input type="text" id="name" value="monopix">
@@ -1057,31 +1024,6 @@ console.log(avatar.<span class="fn">toSVG</span>());</code></pre>
       input.addEventListener('change', render);
     });
 
-    const presets = {
-      neon: { name: 'monopix', gridSize: 7, color: '#BFFF00', background: '#0A0E0A', shape: 'square', pixelShape: 'square', padding: 1, gap: 0 },
-      ahmed: { name: 'أحمد', gridSize: 7, color: '#BFFF00', background: '#050705', shape: 'square', pixelShape: 'square', padding: 1, gap: 0 },
-      sara: { name: 'سارة', gridSize: 7, color: '#00F0FF', background: '#090F14', shape: 'circle', pixelShape: 'circle', padding: 1, gap: 0.1 },
-      retro: { name: 'Arcade', gridSize: 5, color: '#BFFF00', background: '#000000', shape: 'square', pixelShape: 'square', padding: 1, gap: 0 },
-      mohammed: { name: 'محمد', gridSize: 7, color: '#E2E8F0', background: '#121612', shape: 'square', pixelShape: 'rounded', pixelRadius: 0.35, padding: 1, gap: 0 },
-      highres: { name: 'Matrix', gridSize: 14, color: '#BFFF00', background: '#040804', shape: 'circle', pixelShape: 'rounded', pixelRadius: 0.25, padding: 1, gap: 0 }
-    };
-
-    document.querySelectorAll('.preset-pill').forEach(pill => {
-      pill.addEventListener('click', () => {
-        const p = presets[pill.dataset.preset];
-        if (!p) return;
-        els.name.value = p.name;
-        els.gridSize.value = p.gridSize;
-        els.color.value = p.color;
-        els.background.value = p.background;
-        els.shape.value = p.shape;
-        els.pixelShape.value = p.pixelShape;
-        if (p.pixelRadius !== undefined) els.pixelRadius.value = p.pixelRadius;
-        if (p.padding !== undefined) els.padding.value = p.padding;
-        if (p.gap !== undefined) els.gap.value = p.gap;
-        render();
-      });
-    });
 
     // Action handlers: Download SVG
     els.btnDownloadSvg.addEventListener('click', () => {
