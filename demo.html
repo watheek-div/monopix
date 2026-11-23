@@ -3,15 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>monopix - Interactive Playground</title>
+  <title>monopix - Pixel Avatar Generator</title>
   <style>
     :root {
-      --bg: #090D16;
-      --panel: #131B2E;
-      --border: #1E293B;
-      --text: #F1F5F9;
-      --text-muted: #94A3B8;
-      --accent: #38BDF8;
+      --bg: #070907;
+      --bg-panel: #0E130E;
+      --bg-card: #131A13;
+      --border: #1F2C1F;
+      --border-focus: #BFFF00;
+      --text: #F3F8F3;
+      --text-muted: #8E9E8E;
+      --accent: #BFFF00;
+      --accent-glow: rgba(191, 255, 0, 0.35);
+      --accent-dim: rgba(191, 255, 0, 0.12);
     }
     * {
       box-sizing: border-box;
@@ -25,31 +29,140 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
+
+    /* Header */
     header {
-      padding: 20px 32px;
+      background: rgba(10, 14, 10, 0.85);
+      backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
+      padding: 12px 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      gap: 16px;
     }
-    header h1 {
-      font-size: 20px;
-      letter-spacing: -0.5px;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
     }
-    header span {
-      font-size: 13px;
+    .brand-logo {
+      height: 38px;
+      width: auto;
+      display: block;
+    }
+    .header-center {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-nav {
+      display: flex;
+      gap: 6px;
+      background: var(--bg-panel);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
       color: var(--text-muted);
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .layout {
-      display: grid;
-      grid-template-columns: 380px 1fr;
+    .tab-btn:hover {
+      color: var(--text);
+    }
+    .tab-btn.active {
+      background: var(--accent);
+      color: #070907;
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .lang-switcher {
+      display: flex;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px;
+    }
+    .lang-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .lang-btn.active {
+      background: var(--bg-card);
+      color: var(--accent);
+      border: 1px solid var(--border-focus);
+    }
+    .github-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      transition: all 0.15s;
+    }
+    .github-link:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Main Viewports */
+    .view-container {
       flex: 1;
-      height: calc(100vh - 65px);
+      display: none;
+    }
+    .view-container.active {
+      display: flex;
+    }
+
+    /* Playground Layout */
+    .playground-layout {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 390px 1fr;
+      min-height: calc(100vh - 65px);
+    }
+    html[dir="rtl"] .controls {
+      border-left: 1px solid var(--border);
+      border-right: none;
+    }
+    html[dir="ltr"] .controls {
+      border-right: 1px solid var(--border);
+      border-left: none;
     }
     .controls {
-      background: var(--panel);
-      border-left: 1px solid var(--border);
+      background: var(--bg-panel);
       padding: 24px;
       overflow-y: auto;
       display: flex;
@@ -71,19 +184,21 @@
     label span.val {
       color: var(--accent);
       font-family: monospace;
+      font-weight: 700;
     }
     input[type="text"], select, input[type="number"] {
-      background: #0B1120;
+      background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 10px 14px;
       color: var(--text);
       font-size: 14px;
       outline: none;
-      transition: border-color 0.15s;
+      transition: all 0.15s;
     }
     input[type="text"]:focus, select:focus, input[type="number"]:focus {
-      border-color: var(--accent);
+      border-color: var(--border-focus);
+      box-shadow: 0 0 10px var(--accent-glow);
     }
     .color-row {
       display: grid;
@@ -94,7 +209,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      background: #0B1120;
+      background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 6px 10px;
@@ -112,7 +227,7 @@
       padding: 0;
     }
     input[type="color"]::-webkit-color-swatch {
-      border: none;
+      border: 1px solid rgba(255,255,255,0.1);
       border-radius: 6px;
     }
     .color-field span {
@@ -122,7 +237,35 @@
     }
     input[type="range"] {
       accent-color: var(--accent);
+      height: 6px;
+      background: var(--bg-card);
+      border-radius: 4px;
+      outline: none;
     }
+
+    /* Presets */
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .preset-pill {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .preset-pill:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    /* Preview Panel */
     .preview-panel {
       display: flex;
       flex-direction: column;
@@ -130,11 +273,11 @@
       justify-content: center;
       padding: 40px;
       gap: 28px;
-      background: radial-gradient(circle at center, #131E35 0%, var(--bg) 70%);
+      background: radial-gradient(circle at center, #152215 0%, var(--bg) 70%);
       position: relative;
     }
     .avatar-wrapper {
-      filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.6));
+      filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.8));
       transition: transform 0.2s ease;
     }
     .avatar-wrapper:hover {
@@ -143,72 +286,189 @@
     .meta-badge {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      background: #0B1120;
+      gap: 10px;
+      background: var(--bg-panel);
       border: 1px solid var(--border);
-      padding: 6px 14px;
+      padding: 8px 18px;
       border-radius: 20px;
       font-size: 13px;
       color: var(--text-muted);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
     }
     .meta-badge strong {
-      color: var(--text);
+      color: var(--accent);
+      font-size: 16px;
     }
     .actions {
       display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 10px;
     }
     button.btn {
-      background: #1E293B;
+      background: var(--bg-card);
       color: var(--text);
-      border: 1px solid #334155;
+      border: 1px solid var(--border);
       border-radius: 8px;
       padding: 10px 18px;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
     button.btn:hover {
-      background: #334155;
+      background: var(--border);
       border-color: var(--accent);
+      color: var(--accent);
     }
     button.btn-primary {
       background: var(--accent);
-      color: #04101F;
+      color: #070907;
       border-color: var(--accent);
-      font-weight: 600;
+      font-weight: 700;
     }
     button.btn-primary:hover {
-      background: #7DD3FC;
-      border-color: #7DD3FC;
+      background: #D4FF4D;
+      border-color: #D4FF4D;
+      box-shadow: 0 0 20px var(--accent-glow);
+      color: #070907;
     }
-    .presets {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
+    button.btn-secondary {
+      background: rgba(191, 255, 0, 0.15);
+      color: var(--accent);
+      border-color: rgba(191, 255, 0, 0.4);
     }
-    .preset-pill {
-      background: #0B1120;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .preset-pill:hover {
+    button.btn-secondary:hover {
+      background: rgba(191, 255, 0, 0.25);
       border-color: var(--accent);
-      color: var(--text);
+      box-shadow: 0 0 14px var(--accent-glow);
     }
+
+    /* Documentation View */
+    .docs-layout {
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+    }
+    .docs-hero {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+    }
+    .docs-hero h2 {
+      font-size: 28px;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .docs-hero p {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .doc-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .doc-section h3 {
+      font-size: 20px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .code-box {
+      background: #0B0E0B;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .code-header {
+      background: #111711;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+    .code-copy-btn {
+      background: transparent;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .code-box pre {
+      padding: 16px;
+      font-family: "Fira Code", monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #E2E8F0;
+      overflow-x: auto;
+      direction: ltr;
+      text-align: left;
+    }
+    .code-box pre code .kw { color: #F43F5E; }
+    .code-box pre code .fn { color: var(--accent); }
+    .code-box pre code .str { color: #38BDF8; }
+    .code-box pre code .prop { color: #A78BFA; }
+
+    /* Tables */
+    .doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .doc-table th, .doc-table td {
+      padding: 12px 14px;
+      text-align: start;
+      border-bottom: 1px solid var(--border);
+    }
+    .doc-table th {
+      background: #111711;
+      color: var(--text);
+      font-weight: 600;
+    }
+    .doc-table td {
+      background: var(--bg-panel);
+      color: var(--text-muted);
+    }
+    .doc-table tr:last-child td {
+      border-bottom: none;
+    }
+    .doc-table code {
+      background: #070907;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--accent);
+      font-family: monospace;
+      font-size: 12px;
+    }
+
     @media (max-width: 900px) {
-      .layout {
+      header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .playground-layout {
         grid-template-columns: 1fr;
-        height: auto;
       }
       .controls {
-        border-left: none;
+        border-left: none !important;
+        border-right: none !important;
         border-bottom: 1px solid var(--border);
       }
     }
@@ -216,124 +476,502 @@
 </head>
 <body>
   <header>
-    <h1>monopix Playground</h1>
-    <span>توليد الصور الرمزية بالبكسل - معاينة تفاعلية حية</span>
+    <a href="#" class="brand">
+      <svg class="brand-logo" viewBox="50 24 790 212" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="logoGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 76 168 V 122 A 30 30 0 0 1 136 122 V 168 M 136 122 A 30 30 0 0 1 196 122 V 168" />
+          <circle cx="278" cy="130" r="38" />
+          <path d="M 362 168 V 124 A 32 32 0 0 1 426 124 V 168" />
+          <circle cx="510" cy="130" r="38" />
+        </g>
+        <g fill="#BFFF00" filter="url(#logoGlow)">
+          <rect x="582" y="80" width="20" height="140" />
+          <rect x="602" y="80" width="40" height="20" />
+          <rect x="642" y="100" width="20" height="60" />
+          <rect x="602" y="160" width="40" height="20" />
+
+          <rect x="682" y="44" width="20" height="20" />
+          <rect x="682" y="80" width="20" height="100" />
+
+          <rect x="722" y="80" width="20" height="20" />
+          <rect x="802" y="80" width="20" height="20" />
+          <rect x="742" y="100" width="20" height="20" />
+          <rect x="782" y="100" width="20" height="20" />
+          <rect x="762" y="120" width="20" height="20" />
+          <rect x="742" y="140" width="20" height="20" />
+          <rect x="782" y="140" width="20" height="20" />
+          <rect x="722" y="160" width="20" height="20" />
+          <rect x="802" y="160" width="20" height="20" />
+        </g>
+      </svg>
+    </a>
+
+    <div class="header-center">
+      <div class="header-nav">
+        <button class="tab-btn active" id="tab-playground" data-i18n="playgroundTab">المحرر (Playground)</button>
+        <button class="tab-btn" id="tab-docs" data-i18n="docsTab">التوثيق (Docs)</button>
+      </div>
+
+      <div class="lang-switcher">
+        <button class="lang-btn active" id="lang-ar">العربية</button>
+        <button class="lang-btn" id="lang-en">English</button>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <a href="https://github.com/watheek-div/monopix" target="_blank" rel="noreferrer" class="github-link">GitHub</a>
+      <a href="https://www.npmjs.com/package/monopix" target="_blank" rel="noreferrer" class="github-link">npm v1.0.1</a>
+    </div>
   </header>
 
-  <div class="layout">
-    <div class="controls">
-      <div class="form-group">
-        <label>نماذج جاهزة (Presets)</label>
-        <div class="presets">
-          <div class="preset-pill" data-preset="ahmed">أحمد (7x7)</div>
-          <div class="preset-pill" data-preset="sara">سارة (Circle Dots)</div>
-          <div class="preset-pill" data-preset="mohammed">محمد (Rounded)</div>
-          <div class="preset-pill" data-preset="retro">Retro Viper (5x5)</div>
-          <div class="preset-pill" data-preset="highres">High-res K (14x14)</div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="name">الاسم / النص</label>
-        <input type="text" id="name" value="أحمد">
-      </div>
-
-      <div class="form-group">
-        <label for="gridSize">
-          <span>أبعاد الشبكة (Grid Size)</span>
-          <span class="val" id="gridSize-val">7x7</span>
-        </label>
-        <input type="range" id="gridSize" min="3" max="21" step="1" value="7">
-      </div>
-
-      <div class="form-group">
-        <label for="size">
-          <span>حجم الإخراج الكلي (px)</span>
-          <span class="val" id="size-val">220px</span>
-        </label>
-        <input type="range" id="size" min="64" max="400" step="16" value="220">
-      </div>
-
-      <div class="color-row">
+  <!-- VIEW 1: PLAYGROUND -->
+  <main class="view-container active" id="view-playground">
+    <div class="playground-layout">
+      <!-- Controls Column -->
+      <aside class="controls">
         <div class="form-group">
-          <label for="color">لون الحرف</label>
-          <div class="color-field">
-            <input type="color" id="color" value="#10B981">
-            <span id="color-hex">#10B981</span>
+          <label data-i18n="presetsLabel">النماذج الجاهزة (Presets)</label>
+          <div class="presets">
+            <div class="preset-pill" data-preset="neon">Neon Lime</div>
+            <div class="preset-pill" data-preset="ahmed">أحمد (Cyber)</div>
+            <div class="preset-pill" data-preset="sara">سارة (Dots)</div>
+            <div class="preset-pill" data-preset="retro">Retro (5x5)</div>
+            <div class="preset-pill" data-preset="mohammed">محمد (Rounded)</div>
+            <div class="preset-pill" data-preset="highres">Matrix (14x14)</div>
           </div>
         </div>
+
         <div class="form-group">
-          <label for="background">لون الخلفية</label>
-          <div class="color-field">
-            <input type="color" id="background" value="#0F172A">
-            <span id="background-hex">#0F172A</span>
+          <label for="name" data-i18n="nameLabel">الاسم / النص</label>
+          <input type="text" id="name" value="monopix">
+        </div>
+
+        <div class="form-group">
+          <label for="gridSize">
+            <span data-i18n="gridSizeLabel">أبعاد الشبكة</span>
+            <span class="val" id="gridSize-val">7x7</span>
+          </label>
+          <input type="range" id="gridSize" min="3" max="21" step="1" value="7">
+        </div>
+
+        <div class="form-group">
+          <label for="size">
+            <span data-i18n="sizeLabel">حجم الإخراج الكلي</span>
+            <span class="val" id="size-val">240px</span>
+          </label>
+          <input type="range" id="size" min="64" max="400" step="16" value="240">
+        </div>
+
+        <div class="color-row">
+          <div class="form-group">
+            <label for="color" data-i18n="letterColorLabel">لون الحرف</label>
+            <div class="color-field">
+              <input type="color" id="color" value="#BFFF00">
+              <span id="color-hex">#BFFF00</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="background" data-i18n="bgColorLabel">لون الخلفية</label>
+            <div class="color-field">
+              <input type="color" id="background" value="#0A0E0A">
+              <span id="background-hex">#0A0E0A</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="shape">شكل الإطار الخارجي</label>
-        <select id="shape">
-          <option value="square" selected>مربع (Square)</option>
-          <option value="circle">دائري (Circle)</option>
-        </select>
-      </div>
+        <div class="form-group">
+          <label for="shape" data-i18n="shapeLabel">شكل الإطار الخارجي</label>
+          <select id="shape">
+            <option value="square" selected data-i18n="shapeSquare">مربع</option>
+            <option value="circle" data-i18n="shapeCircle">دائري</option>
+          </select>
+        </div>
 
-      <div class="form-group">
-        <label for="pixelShape">شكل البكسل الفردي</label>
-        <select id="pixelShape">
-          <option value="square" selected>مربع (Square)</option>
-          <option value="circle">دائري (Circle Dots)</option>
-          <option value="rounded">حواف دائرية (Rounded)</option>
-        </select>
-      </div>
+        <div class="form-group">
+          <label for="pixelShape" data-i18n="pixelShapeLabel">شكل البكسل الفردي</label>
+          <select id="pixelShape">
+            <option value="square" selected data-i18n="pixelSquare">مربع</option>
+            <option value="circle" data-i18n="pixelCircle">دائري</option>
+            <option value="rounded" data-i18n="pixelRounded">حواف دائرية</option>
+          </select>
+        </div>
 
-      <div class="form-group" id="pixelRadius-group" style="display: none;">
-        <label for="pixelRadius">
-          <span>استدارة البكسل (Corner Radius)</span>
-          <span class="val" id="pixelRadius-val">0.3</span>
-        </label>
-        <input type="range" id="pixelRadius" min="0" max="0.5" step="0.05" value="0.3">
-      </div>
+        <div class="form-group" id="pixelRadius-group" style="display: none;">
+          <label for="pixelRadius">
+            <span data-i18n="radiusLabel">استدارة البكسل</span>
+            <span class="val" id="pixelRadius-val">0.3</span>
+          </label>
+          <input type="range" id="pixelRadius" min="0" max="0.5" step="0.05" value="0.3">
+        </div>
 
-      <div class="form-group">
-        <label for="padding">
-          <span>الهامش الداخلي (Padding)</span>
-          <span class="val" id="padding-val">1 cell</span>
-        </label>
-        <input type="range" id="padding" min="0" max="3" step="0.5" value="1">
-      </div>
+        <div class="form-group">
+          <label for="padding">
+            <span data-i18n="paddingLabel">الهامش الداخلي</span>
+            <span class="val" id="padding-val">1 cell</span>
+          </label>
+          <input type="range" id="padding" min="0" max="3" step="0.5" value="1">
+        </div>
 
-      <div class="form-group">
-        <label for="gap">
-          <span>الفراغ بين البكسلات (Gap)</span>
-          <span class="val" id="gap-val">0</span>
-        </label>
-        <input type="range" id="gap" min="0" max="0.4" step="0.05" value="0">
-      </div>
+        <div class="form-group">
+          <label for="gap">
+            <span data-i18n="gapLabel">الفراغ بين البكسلات</span>
+            <span class="val" id="gap-val">0</span>
+          </label>
+          <input type="range" id="gap" min="0" max="0.4" step="0.05" value="0">
+        </div>
+      </aside>
+
+      <!-- Live Preview Column -->
+      <section class="preview-panel">
+        <div class="avatar-wrapper" id="avatar-container"></div>
+
+        <div class="meta-badge" id="meta-badge">
+          <span data-i18n="charExtracted">المحرف المستخرج:</span>
+          <strong id="meta-char">M</strong>
+          <span>•</span>
+          <span id="meta-dims">7x7</span>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" id="btn-download-svg" data-i18n="downloadSvg">تحميل SVG</button>
+          <button class="btn btn-secondary" id="btn-download-png" data-i18n="downloadPng">تحميل PNG</button>
+          <button class="btn" id="btn-copy-svg" data-i18n="copySvg">نسخ كود SVG</button>
+          <button class="btn" id="btn-copy-uri" data-i18n="copyUri">نسخ Data URI</button>
+        </div>
+      </section>
     </div>
+  </main>
 
-    <div class="preview-panel">
-      <div class="avatar-wrapper" id="avatar-container"></div>
-
-      <div class="meta-badge" id="meta-badge">
-        <span>الحرف المستخرج:</span>
-        <strong id="meta-char">أ</strong>
-        <span>•</span>
-        <span id="meta-dims">7x7 cells</span>
+  <!-- VIEW 2: DOCS -->
+  <main class="view-container" id="view-docs">
+    <div class="docs-layout">
+      <div class="docs-hero">
+        <h2 data-i18n="docsTitle">دليل استخدام مكتبة monopix</h2>
+        <p data-i18n="docsDesc">مكتبة JavaScript / TypeScript سريعة وخفيفة لتوليد الصور الرمزية بالبكسل مع دعم الحروف العربية واللاتينية ومخرجات متعددة بدون أي اعتماديات خارجية.</p>
       </div>
 
-      <div class="actions">
-        <button class="btn btn-primary" id="btn-download">تحميل SVG</button>
-        <button class="btn" id="btn-copy-svg">نسخ كود SVG</button>
-        <button class="btn" id="btn-copy-uri">نسخ Data URI</button>
-      </div>
+      <!-- Installation -->
+      <section class="doc-section">
+        <h3 data-i18n="secInstall">1. التثبيت (Installation)</h3>
+        <div class="code-box">
+          <div class="code-header">
+            <span>TERMINAL</span>
+            <button class="code-copy-btn" data-i18n="copy" onclick="navigator.clipboard.writeText('npm install monopix')">نسخ</button>
+          </div>
+          <pre><code>npm install monopix</code></pre>
+        </div>
+      </section>
+
+      <!-- Quick Start -->
+      <section class="doc-section">
+        <h3 data-i18n="secQuick">2. البداية السريعة (Quick Start)</h3>
+        <div class="code-box">
+          <div class="code-header">
+            <span>TYPESCRIPT / ESM</span>
+            <button class="code-copy-btn" data-i18n="copy" onclick="navigator.clipboard.writeText(document.getElementById('code-esm').innerText)">نسخ</button>
+          </div>
+          <pre><code id="code-esm"><span class="kw">import</span> { <span class="fn">createAvatar</span> } <span class="kw">from</span> <span class="str">'monopix'</span>;
+
+<span class="kw">const</span> avatar = <span class="fn">createAvatar</span>({
+  <span class="prop">name</span>: <span class="str">'Ahmed'</span>,
+  <span class="prop">size</span>: <span class="str">160</span>,
+  <span class="prop">options</span>: {
+    <span class="prop">gridSize</span>: <span class="str">7</span>,
+    <span class="prop">color</span>: <span class="str">'#BFFF00'</span>,
+    <span class="prop">background</span>: <span class="str">'#0A0E0A'</span>,
+    <span class="prop">shape</span>: <span class="str">'square'</span>,
+    <span class="prop">pixelShape</span>: <span class="str">'square'</span>
+  }
+});
+
+<span class="kw">const</span> svg = avatar.<span class="fn">toSVG</span>();       <span class="str">// SVG markup string</span>
+<span class="kw">const</span> uri = avatar.<span class="fn">toDataURI</span>();   <span class="str">// Data URI for &lt;img src="..."&gt;</span></code></pre>
+        </div>
+      </section>
+
+      <!-- CommonJS -->
+      <section class="doc-section">
+        <h3 data-i18n="secCjs">3. استخدام CommonJS</h3>
+        <div class="code-box">
+          <div class="code-header">
+            <span>JAVASCRIPT / NODE.JS</span>
+          </div>
+          <pre><code><span class="kw">const</span> { <span class="fn">createAvatar</span> } = <span class="fn">require</span>(<span class="str">'monopix'</span>);
+
+<span class="kw">const</span> avatar = <span class="fn">createAvatar</span>({ <span class="prop">name</span>: <span class="str">'Saeed'</span> });
+console.log(avatar.<span class="fn">toSVG</span>());</code></pre>
+        </div>
+      </section>
+
+      <!-- Options Table -->
+      <section class="doc-section">
+        <h3 data-i18n="secOptions">4. جدول الخيارات (PixelOptions)</h3>
+        <table class="doc-table">
+          <thead>
+            <tr>
+              <th data-i18n="colProp">الخاصية</th>
+              <th data-i18n="colType">النوع</th>
+              <th data-i18n="colDefault">القيمة الافتراضية</th>
+              <th data-i18n="colDesc">الوصف</th>
+            </tr>
+          </thead>
+          <tbody id="options-table-body">
+            <!-- Rendered dynamically by language -->
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Methods Table -->
+      <section class="doc-section">
+        <h3 data-i18n="secMethods">5. دوال كائن MonopixAvatar</h3>
+        <table class="doc-table">
+          <thead>
+            <tr>
+              <th data-i18n="colMethod">الدالة</th>
+              <th data-i18n="colOutput">المخرجات</th>
+              <th data-i18n="colDesc">الوصف</th>
+            </tr>
+          </thead>
+          <tbody id="methods-table-body">
+            <!-- Rendered dynamically by language -->
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Custom Modes -->
+      <section class="doc-section">
+        <h3 data-i18n="secCustom">6. تسجيل نمط مخصص (Custom Mode)</h3>
+        <div class="code-box">
+          <div class="code-header">
+            <span>TYPESCRIPT</span>
+          </div>
+          <pre><code><span class="kw">import</span> { <span class="fn">registerMode</span>, <span class="fn">createAvatar</span> } <span class="kw">from</span> <span class="str">'monopix'</span>;
+
+<span class="fn">registerMode</span>(<span class="str">'badge'</span>, (name, size) =&gt; {
+  <span class="kw">const</span> char = name.charAt(<span class="str">0</span>).toUpperCase();
+  <span class="kw">return</span> {
+    char,
+    grid: [[<span class="kw">true</span>]],
+    svg: `&lt;svg viewBox="0 0 ${size} ${size}"&gt;&lt;text&gt;${char}&lt;/text&gt;&lt;/svg&gt;`
+  };
+});
+
+<span class="kw">const</span> avatar = <span class="fn">createAvatar</span>({ <span class="prop">name</span>: <span class="str">'Watheek'</span>, <span class="prop">mode</span>: <span class="str">'badge'</span> });</code></pre>
+        </div>
+      </section>
     </div>
-  </div>
+  </main>
 
   <script type="module">
-    import { createAvatar } from './dist/index.js';
+    // Dynamic import: loads local build if available, falls back to npm CDN on GitHub Pages
+    let createAvatar;
+    try {
+      const mod = await import('./dist/index.js');
+      createAvatar = mod.createAvatar;
+    } catch {
+      const cdnMod = await import('https://cdn.jsdelivr.net/npm/monopix@1.0.1/dist/index.js');
+      createAvatar = cdnMod.createAvatar;
+    }
 
+    // Translations Dictionary
+    const translations = {
+      ar: {
+        playgroundTab: 'المحرر (Playground)',
+        docsTab: 'التوثيق (Docs)',
+        presetsLabel: 'النماذج الجاهزة (Presets)',
+        nameLabel: 'الاسم / النص',
+        gridSizeLabel: 'أبعاد الشبكة',
+        sizeLabel: 'حجم الإخراج الكلي',
+        letterColorLabel: 'لون الحرف',
+        bgColorLabel: 'لون الخلفية',
+        shapeLabel: 'شكل الإطار الخارجي',
+        shapeSquare: 'مربع',
+        shapeCircle: 'دائري',
+        pixelShapeLabel: 'شكل البكسل الفردي',
+        pixelSquare: 'مربع',
+        pixelCircle: 'دائري',
+        pixelRounded: 'حواف دائرية',
+        radiusLabel: 'استدارة البكسل',
+        paddingLabel: 'الهامش الداخلي',
+        gapLabel: 'الفراغ بين البكسلات',
+        charExtracted: 'المحرف المستخرج:',
+        cellsUnit: 'خلايا',
+        cellUnit: 'خلية',
+        downloadSvg: 'تحميل SVG',
+        downloadPng: 'تحميل PNG',
+        copySvg: 'نسخ كود SVG',
+        copyUri: 'نسخ Data URI',
+        copied: 'تم النسخ!',
+        docsTitle: 'دليل استخدام مكتبة monopix',
+        docsDesc: 'مكتبة JavaScript / TypeScript سريعة وخفيفة لتوليد الصور الرمزية بالبكسل مع دعم الحروف العربية واللاتينية ومخرجات متعددة بدون أي اعتماديات خارجية.',
+        secInstall: '1. التثبيت (Installation)',
+        secQuick: '2. البداية السريعة (Quick Start)',
+        secCjs: '3. استخدام CommonJS',
+        secOptions: '4. جدول الخيارات (PixelOptions)',
+        secMethods: '5. دوال كائن MonopixAvatar',
+        secCustom: '6. تسجيل نمط مخصص (Custom Mode)',
+        copy: 'نسخ',
+        colProp: 'الخاصية',
+        colType: 'النوع',
+        colDefault: 'القيمة الافتراضية',
+        colDesc: 'الوصف',
+        colMethod: 'الدالة',
+        colOutput: 'المخرجات',
+        optionsRows: [
+          { prop: 'gridSize', type: 'number', def: '7', desc: 'حجم شبكة البكسل (مثال: 5 لـ 5x5، 7 لـ 7x7، 14 لـ 14x14)' },
+          { prop: 'color', type: 'string', def: '#FFFFFF', desc: 'لون بكسلات الحرف (Hex, RGB, HSL)' },
+          { prop: 'background', type: 'string', def: '#0F172A', desc: 'لون خلفية الصورة الرمزية' },
+          { prop: 'shape', type: "'square' | 'circle'", def: "'square'", desc: 'الشكل الخارجي للإطار' },
+          { prop: 'pixelShape', type: "'square' | 'circle' | 'rounded'", def: "'square'", desc: 'شكل رسم البكسل الفردي داخل الشبكة' },
+          { prop: 'padding', type: 'number', def: '1', desc: 'الهامش الداخلي بوحدة الخلايا حول الحرف' },
+          { prop: 'pixelRadius', type: 'number', def: '0.25', desc: 'نسبة استدارة حواف البكسل عند اختيار rounded' },
+          { prop: 'gap', type: 'number', def: '0', desc: 'المسافة الفاصلة بين البكسلات (من 0 إلى 0.5)' }
+        ],
+        methodsRows: [
+          { method: 'avatar.toSVG()', out: 'string', desc: 'توليد كود SVG نصي متكامل وجاهز للعرض' },
+          { method: 'avatar.toDataURI(base64?)', out: 'string', desc: 'توليد رابط Data URI بصيغة UTF-8 أو Base64' },
+          { method: 'avatar.renderToCanvas(canvas)', out: 'Promise<void>', desc: 'رسم الصورة الرمزية مباشرة على عنصر Canvas' },
+          { method: 'avatar.getGrid()', out: 'boolean[][]', desc: 'إرجاع مصفوفة ثنائية الأبعاد بحالة كل بكسل (مضاء/مطفأ)' }
+        ]
+      },
+      en: {
+        playgroundTab: 'Playground',
+        docsTab: 'Documentation',
+        presetsLabel: 'Presets',
+        nameLabel: 'Name / Text',
+        gridSizeLabel: 'Grid Size',
+        sizeLabel: 'Output Size',
+        letterColorLabel: 'Letter Color',
+        bgColorLabel: 'Background Color',
+        shapeLabel: 'Outer Shape',
+        shapeSquare: 'Square',
+        shapeCircle: 'Circle',
+        pixelShapeLabel: 'Pixel Shape',
+        pixelSquare: 'Square',
+        pixelCircle: 'Circle',
+        pixelRounded: 'Rounded',
+        radiusLabel: 'Corner Radius',
+        paddingLabel: 'Padding',
+        gapLabel: 'Pixel Gap',
+        charExtracted: 'Extracted Character:',
+        cellsUnit: 'cells',
+        cellUnit: 'cell',
+        downloadSvg: 'Download SVG',
+        downloadPng: 'Download PNG',
+        copySvg: 'Copy SVG',
+        copyUri: 'Copy Data URI',
+        copied: 'Copied!',
+        docsTitle: 'monopix Library Documentation',
+        docsDesc: 'Lightweight, zero-dependency JavaScript/TypeScript avatar generator creating crisp pixel-art avatars from initials with extensible multi-mode architecture.',
+        secInstall: '1. Installation',
+        secQuick: '2. Quick Start',
+        secCjs: '3. CommonJS Usage',
+        secOptions: '4. PixelOptions Reference',
+        secMethods: '5. MonopixAvatar Methods',
+        secCustom: '6. Custom Mode Registration',
+        copy: 'Copy',
+        colProp: 'Property',
+        colType: 'Type',
+        colDefault: 'Default',
+        colDesc: 'Description',
+        colMethod: 'Method',
+        colOutput: 'Output',
+        optionsRows: [
+          { prop: 'gridSize', type: 'number', def: '7', desc: 'Pixel grid dimension (e.g. 5 for 5x5, 7 for 7x7, 14 for 14x14)' },
+          { prop: 'color', type: 'string', def: '#FFFFFF', desc: 'CSS color string for the letter pixels' },
+          { prop: 'background', type: 'string', def: '#0F172A', desc: 'CSS color string for the background' },
+          { prop: 'shape', type: "'square' | 'circle'", def: "'square'", desc: 'Outer frame shape' },
+          { prop: 'pixelShape', type: "'square' | 'circle' | 'rounded'", def: "'square'", desc: 'Individual pixel rendering shape' },
+          { prop: 'padding', type: 'number', def: '1', desc: 'Internal padding in cell units' },
+          { prop: 'pixelRadius', type: 'number', def: '0.25', desc: 'Corner radius ratio when pixelShape is rounded' },
+          { prop: 'gap', type: 'number', def: '0', desc: 'Spacing between pixels (0 to 0.5)' }
+        ],
+        methodsRows: [
+          { method: 'avatar.toSVG()', out: 'string', desc: 'Generates standalone SVG markup string' },
+          { method: 'avatar.toDataURI(base64?)', out: 'string', desc: 'Encodes avatar into UTF-8 or Base64 Data URI' },
+          { method: 'avatar.renderToCanvas(canvas)', out: 'Promise<void>', desc: 'Directly draws the avatar onto an HTML5 Canvas' },
+          { method: 'avatar.getGrid()', out: 'boolean[][]', desc: 'Returns 2D boolean array representing the pixel grid' }
+        ]
+      }
+    };
+
+    let currentLang = 'ar';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+      document.getElementById('lang-ar').classList.toggle('active', lang === 'ar');
+      document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+
+      const dict = translations[lang];
+
+      // Update text nodes
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) {
+          el.textContent = dict[key];
+        }
+      });
+
+      // Update Options Table
+      const optTbody = document.getElementById('options-table-body');
+      optTbody.innerHTML = dict.optionsRows.map(row => `
+        <tr>
+          <td><code>${row.prop}</code></td>
+          <td>${row.type}</td>
+          <td><code>${row.def}</code></td>
+          <td>${row.desc}</td>
+        </tr>
+      `).join('');
+
+      // Update Methods Table
+      const metTbody = document.getElementById('methods-table-body');
+      metTbody.innerHTML = dict.methodsRows.map(row => `
+        <tr>
+          <td><code>${row.method}</code></td>
+          <td>${row.out}</td>
+          <td>${row.desc}</td>
+        </tr>
+      `).join('');
+
+      render();
+    }
+
+    document.getElementById('lang-ar').addEventListener('click', () => setLanguage('ar'));
+    document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+
+    // Navigation Tabs
+    const tabPlayground = document.getElementById('tab-playground');
+    const tabDocs = document.getElementById('tab-docs');
+    const viewPlayground = document.getElementById('view-playground');
+    const viewDocs = document.getElementById('view-docs');
+
+    tabPlayground.addEventListener('click', () => {
+      tabPlayground.classList.add('active');
+      tabDocs.classList.remove('active');
+      viewPlayground.classList.add('active');
+      viewDocs.classList.remove('active');
+    });
+
+    tabDocs.addEventListener('click', () => {
+      tabDocs.classList.add('active');
+      tabPlayground.classList.remove('active');
+      viewDocs.classList.add('active');
+      viewPlayground.classList.remove('active');
+    });
+
+    // Elements
     const els = {
       name: document.getElementById('name'),
       gridSize: document.getElementById('gridSize'),
@@ -356,7 +994,8 @@
       container: document.getElementById('avatar-container'),
       metaChar: document.getElementById('meta-char'),
       metaDims: document.getElementById('meta-dims'),
-      btnDownload: document.getElementById('btn-download'),
+      btnDownloadSvg: document.getElementById('btn-download-svg'),
+      btnDownloadPng: document.getElementById('btn-download-png'),
       btnCopySvg: document.getElementById('btn-copy-svg'),
       btnCopyUri: document.getElementById('btn-copy-uri'),
     };
@@ -375,12 +1014,13 @@
       const padding = parseFloat(els.padding.value);
       const gap = parseFloat(els.gap.value);
 
-      // Value label updates
+      const dict = translations[currentLang];
+
       els.gridSizeVal.textContent = `${gridSize}x${gridSize}`;
       els.sizeVal.textContent = `${size}px`;
       els.colorHex.textContent = color.toUpperCase();
       els.backgroundHex.textContent = background.toUpperCase();
-      els.paddingVal.textContent = `${padding} cell`;
+      els.paddingVal.textContent = `${padding} ${dict.cellUnit}`;
       els.gapVal.textContent = `${gap}`;
       els.pixelRadiusVal.textContent = `${pixelRadius}`;
 
@@ -403,10 +1043,9 @@
 
       els.container.innerHTML = currentAvatar.toSVG();
       els.metaChar.textContent = currentAvatar.char;
-      els.metaDims.textContent = `${gridSize}x${gridSize} cells`;
+      els.metaDims.textContent = `${gridSize}x${gridSize} ${dict.cellsUnit}`;
     }
 
-    // Attach listeners
     const inputs = [
       els.name, els.gridSize, els.size, els.color,
       els.background, els.shape, els.pixelShape,
@@ -418,13 +1057,13 @@
       input.addEventListener('change', render);
     });
 
-    // Preset configurations
     const presets = {
-      ahmed: { name: 'أحمد', gridSize: 7, color: '#10B981', background: '#0F172A', shape: 'square', pixelShape: 'square', padding: 1, gap: 0 },
-      sara: { name: 'سارة', gridSize: 7, color: '#F43F5E', background: '#1E1B4B', shape: 'circle', pixelShape: 'circle', padding: 1, gap: 0.1 },
-      mohammed: { name: 'محمد', gridSize: 7, color: '#F59E0B', background: '#18181B', shape: 'square', pixelShape: 'rounded', pixelRadius: 0.35, padding: 1, gap: 0 },
-      retro: { name: 'Viper', gridSize: 5, color: '#38BDF8', background: '#090D16', shape: 'square', pixelShape: 'square', padding: 1, gap: 0 },
-      highres: { name: 'Kratos', gridSize: 14, color: '#818CF8', background: '#1E1B4B', shape: 'circle', pixelShape: 'rounded', pixelRadius: 0.25, padding: 1, gap: 0 }
+      neon: { name: 'monopix', gridSize: 7, color: '#BFFF00', background: '#0A0E0A', shape: 'square', pixelShape: 'square', padding: 1, gap: 0 },
+      ahmed: { name: 'أحمد', gridSize: 7, color: '#BFFF00', background: '#050705', shape: 'square', pixelShape: 'square', padding: 1, gap: 0 },
+      sara: { name: 'سارة', gridSize: 7, color: '#00F0FF', background: '#090F14', shape: 'circle', pixelShape: 'circle', padding: 1, gap: 0.1 },
+      retro: { name: 'Arcade', gridSize: 5, color: '#BFFF00', background: '#000000', shape: 'square', pixelShape: 'square', padding: 1, gap: 0 },
+      mohammed: { name: 'محمد', gridSize: 7, color: '#E2E8F0', background: '#121612', shape: 'square', pixelShape: 'rounded', pixelRadius: 0.35, padding: 1, gap: 0 },
+      highres: { name: 'Matrix', gridSize: 14, color: '#BFFF00', background: '#040804', shape: 'circle', pixelShape: 'rounded', pixelRadius: 0.25, padding: 1, gap: 0 }
     };
 
     document.querySelectorAll('.preset-pill').forEach(pill => {
@@ -444,40 +1083,74 @@
       });
     });
 
-    // Action handlers
-    els.btnDownload.addEventListener('click', () => {
+    // Action handlers: Download SVG
+    els.btnDownloadSvg.addEventListener('click', () => {
       if (!currentAvatar) return;
       const blob = new Blob([currentAvatar.toSVG()], { type: 'image/svg+xml;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `avatar-${currentAvatar.char}.svg`;
+      a.download = `monopix-${currentAvatar.char}.svg`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     });
 
+    // Action handlers: Download PNG
+    els.btnDownloadPng.addEventListener('click', () => {
+      if (!currentAvatar) return;
+      const svgString = currentAvatar.toSVG();
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const exportResolution = 512;
+        canvas.width = exportResolution;
+        canvas.height = exportResolution;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(img, 0, 0, exportResolution, exportResolution);
+
+        const pngUrl = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = pngUrl;
+        a.download = `monopix-${currentAvatar.char}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      };
+
+      img.src = url;
+    });
+
+    // Action handlers: Copy SVG
     els.btnCopySvg.addEventListener('click', () => {
       if (!currentAvatar) return;
+      const dict = translations[currentLang];
       navigator.clipboard.writeText(currentAvatar.toSVG()).then(() => {
         const orig = els.btnCopySvg.textContent;
-        els.btnCopySvg.textContent = 'تم النسخ!';
+        els.btnCopySvg.textContent = dict.copied;
         setTimeout(() => els.btnCopySvg.textContent = orig, 1500);
       });
     });
 
+    // Action handlers: Copy Data URI
     els.btnCopyUri.addEventListener('click', () => {
       if (!currentAvatar) return;
+      const dict = translations[currentLang];
       navigator.clipboard.writeText(currentAvatar.toDataURI()).then(() => {
         const orig = els.btnCopyUri.textContent;
-        els.btnCopyUri.textContent = 'تم النسخ!';
+        els.btnCopyUri.textContent = dict.copied;
         setTimeout(() => els.btnCopyUri.textContent = orig, 1500);
       });
     });
 
-    // Initial render
-    render();
+    // Initialize with Arabic
+    setLanguage('ar');
   </script>
 </body>
 </html>

@@ -25,6 +25,7 @@
     "build": "tsup",
     "test": "vitest run",
     "test:watch": "vitest",
+    "demo": "npx serve .",
     "prepublishOnly": "npm run build && npm test"
   },
   "keywords": [
